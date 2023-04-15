@@ -37,6 +37,7 @@ describe('Node Server Request Listener Function', function() {
   });
 
   it('Should accept posts to /classes/messages', function() {
+    // debugger;
     var stubMsg = {
       username: 'Jono',
       text: 'Do my bidding!'
