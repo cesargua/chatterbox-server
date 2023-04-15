@@ -40,6 +40,7 @@ describe('server', function() {
   });
 
   it('should respond with messages that were previously posted', function(done) {
+
     var requestParams = {method: 'POST',
       uri: 'http://127.0.0.1:3000/classes/messages',
       json: {
@@ -60,6 +61,7 @@ describe('server', function() {
 
   it('Should 404 when asked for a nonexistent endpoint', function(done) {
     request('http://127.0.0.1:3000/arglebargle', function(error, response, body) {
+      debugger;
       expect(response.statusCode).to.equal(404);
       done();
     });

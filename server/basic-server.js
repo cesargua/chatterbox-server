@@ -23,10 +23,11 @@ var ip = '127.0.0.1';
 // incoming requests.
 //
 // After creating the server, we will tell it to listen on the given port and IP. */
+exports.storage = {}
 var server = http.createServer(handleRequest.requestHandler);
 console.log('Listening on http://' + ip + ':' + port);
 server.listen(port, ip);
-var storage = {}
+
 // To start this server, run:
 //
 //   node basic-server.js

@@ -43,6 +43,7 @@ this file and include it in basic-server.js so that it actually works.
   // client from this domain by setting up static file serving.
 
 **************************************************************/
+const storage = require('./basic-server')
 
 var requestHandler = function(request, response) {
 
@@ -51,40 +52,59 @@ var requestHandler = function(request, response) {
   const {headers, method, url} = request;
   var statusCode = 200;
   var headers_res = defaultCorsHeaders;
-  if(request.method === 'POST'){
+  //add an api end point to recieve get and post requests /classes/messages
+  debugger;
+  if(request.method === 'POST' && request.url === '/classes/messages'){
     let body = [];
+    // console.log("data inside request", request)
+    console.log('POST')
+    statusCode = 201//set status to 201
+    // on error set status to 404
+    // request.on('error', () => {
+    //   statusCode = 404
+    // })
     request.on('data', (message) => {
-      body.push(message);
-      if(!storage[message.roomname]){
-        storage[message.roomname] = [message];
+
+      var parsedMessage = String.fromCharCode(...message)
+      var JSONMessage = JSON.parse(parsedMessage);
+      var messageObj = JSONMessage.json;
+      console.log(messageObj)
+      if(!storage[messageObj.username]){
+        storage[messageObj.username] = [messageObj];
       } else {
-        storage[message.roomname].unshift(message);
+        storage[messageObj.username].unshift(messageObj);
       }
+      body.push(JSONMessage);
     }).on('end', () => {
-      body = Buffer.concat(body).toString();
-      response.end(body)
+      //  body = Buffer.concat(body).toString();
     });
-
     headers_res['Content-Type'] = 'application/json'; //change!
     response.writeHead(statusCode, headers_res);
-    const responseBody = {headers, method, url, body}
-    response.write(JSON.stringify(responseBody));
-  } else if(request.method === 'GET'){
+    response.write(JSON.stringify(body));
+  } else if(request.method === 'GET' && request.url === '/classes/messages') {
+    // look at request to get room name, if none specified, default lobby
+    const responseBody = []
+    request.on('data', (message) => {
+      var parsedMessage = String.fromCharCode(...message)
+      var JSONMessage = JSON.parse(parsedMessage);
+      if (!message.roomname) {
+        message.roomname = 'lobby';
+      }
+      storage[message.roomname].forEach((msg) => {
+        responseBody.push(msg);
+      })
+    })
    //grab necesarry information from data-structure
+   //for each message in storag[roomname]
+     //push to response body
     headers_res['Content-Type'] = 'application/json'; //change!
     response.writeHead(statusCode, headers_res);
-    const responseBody = {headers, method, url}
-    response.write(JSON.stringify("hi"));
+    // console.log(responseBody)
+    response.write(JSON.stringify(responseBody));
+  } else {
+    response.writeHead(404);
+    // console.log(response)
   }
-    //then handle GET handle
-  // else if req.methd === 'POST
-      //handle POST request
-
-
-
-
-  ///////process request into a body
-  // The outgoing status.
 
   // See the note below about CORS headers.
   response.end();
